@@ -73,7 +73,11 @@ public class CameraActivity2 extends BaseActivity implements CameraInterface.Cam
     }
 
     private void changeLayout(){
-        changeLayout(FrameLayout.LayoutParams.MATCH_PARENT,FrameLayout.LayoutParams.MATCH_PARENT);
+        ViewGroup.LayoutParams params = mFrameLayout.getLayoutParams();
+        params.width = FrameLayout.LayoutParams.MATCH_PARENT;
+        params.height = FrameLayout.LayoutParams.MATCH_PARENT ;
+        mFrameLayout.setLayoutParams(params);
+        mTextView.setVisibility(View.GONE);
     }
 
     // 短边铺满，长边缩放  摄像头旋转过90
@@ -174,7 +178,7 @@ public class CameraActivity2 extends BaseActivity implements CameraInterface.Cam
                 // change view size
                 changeLayout(list.get(pos).width,list.get(pos).height);
             }else {
-                mTextView.setVisibility(View.GONE);
+                changeLayout();
             }
 
         }
