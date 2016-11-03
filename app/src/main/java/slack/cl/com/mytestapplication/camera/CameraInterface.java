@@ -331,9 +331,10 @@ public class CameraInterface implements Camera.PreviewCallback{
         return mCamera.getParameters().getSupportedPreviewSizes();
     }
 
-
-
-
+    public List<Size> getSupportedPictureSizes(){
+        if(mCamera == null) return null;
+        return mCamera.getParameters().getSupportedPictureSizes();
+    }
 
     /*为了实现拍照的快门声音及拍照保存照片需要下面三个回调变量*/
     ShutterCallback mShutterCallback = new ShutterCallback()

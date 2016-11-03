@@ -27,7 +27,7 @@ public class CameraActivity2 extends BaseActivity implements CameraInterface.Cam
     private final int REQ_CAMERA_PERMISSION = 0x01;
     CameraTextureView textureView = null;
     float previewRate = -1f;
-    private RecyclerView mRecyclerView;
+    private RecyclerView mRecyclerView,mRecyclerView2;
     private List<Camera.Size> list;
     private FrameLayout mFrameLayout;
     private boolean changeLayout;
@@ -59,6 +59,10 @@ public class CameraActivity2 extends BaseActivity implements CameraInterface.Cam
         textureView = (CameraTextureView) findViewById(R.id.camera_surfaceview);
         mRecyclerView = (RecyclerView) findViewById(R.id.camera_recycleView);
         mRecyclerView.setLayoutManager(new LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false));
+
+        mRecyclerView2 = (RecyclerView) findViewById(R.id.camera_recycleView2);
+        mRecyclerView2.setLayoutManager(new LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false));
+
         mTextView = (TextView) findViewById(R.id.camera_text);
 
         ((CheckBox) findViewById(R.id.checkBox)).setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
@@ -143,29 +147,28 @@ public class CameraActivity2 extends BaseActivity implements CameraInterface.Cam
                     if (textureView.getSurfaceTexture() == null) {
                         mHandler.postDelayed(this, 100);
                     } else {
-                        CameraInterface.getInstance().doStartPreview(textureView.getSurfaceTexture(), previewRate);
-                        runOnUiThread(new Runnable() {
-                            @Override
-                            public void run() {
-                                list = CameraInterface.getInstance().getSupportedPreviewSizes();
-                                mRecyclerView.setAdapter(new CameraPreviewSizeAdapter(CameraActivity2.this, list, itemClickListener));
-                            }
-                        });
+                        initData();
                     }
                 }
             }, 100);
         } else {
-            CameraInterface.getInstance().doStartPreview(textureView.getSurfaceTexture(), previewRate);
-            runOnUiThread(new Runnable() {
-                @Override
-                public void run() {
-                    list = CameraInterface.getInstance().getSupportedPreviewSizes();
-                    mRecyclerView.setAdapter(new CameraPreviewSizeAdapter(CameraActivity2.this, list, itemClickListener));
-                }
-            });
+            initData();
         }
+    }
 
+    private void initData(){
+        CameraInterface.getInstance().doStartPreview(textureView.getSurfaceTexture(), previewRate);
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                list = CameraInterface.getInstance().getSupportedPreviewSizes();
+                mRecyclerView.setAdapter(new CameraPreviewSizeAdapter(CameraActivity2.this, list, itemClickListener));
 
+                mRecyclerView2.setAdapter(
+                        new CameraPreviewSizeAdapter(CameraActivity2.this,
+                                CameraInterface.getInstance().getSupportedPictureSizes(), null));
+            }
+        });
     }
 
     CameraPreviewSizeAdapter.ItemClickListener itemClickListener = new CameraPreviewSizeAdapter.ItemClickListener() {
