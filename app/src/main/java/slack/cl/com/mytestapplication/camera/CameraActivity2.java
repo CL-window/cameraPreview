@@ -1,12 +1,20 @@
 package slack.cl.com.mytestapplication.camera;
 
+import android.app.Activity;
+import android.app.ActivityManager;
+import android.app.AlertDialog;
+import android.content.ClipData;
+import android.content.ClipboardManager;
+import android.content.DialogInterface;
 import android.graphics.Point;
 import android.hardware.Camera;
+import android.os.Build;
 import android.support.annotation.NonNull;
 import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
+import android.view.Display;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
@@ -27,7 +35,7 @@ public class CameraActivity2 extends BaseActivity implements CameraInterface.Cam
     private final int REQ_CAMERA_PERMISSION = 0x01;
     CameraTextureView textureView = null;
     float previewRate = -1f;
-    private RecyclerView mRecyclerView,mRecyclerView2;
+    private RecyclerView mRecyclerView;
     private List<Camera.Size> list;
     private FrameLayout mFrameLayout;
     private boolean changeLayout;
@@ -60,9 +68,6 @@ public class CameraActivity2 extends BaseActivity implements CameraInterface.Cam
         mRecyclerView = (RecyclerView) findViewById(R.id.camera_recycleView);
         mRecyclerView.setLayoutManager(new LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false));
 
-        mRecyclerView2 = (RecyclerView) findViewById(R.id.camera_recycleView2);
-        mRecyclerView2.setLayoutManager(new LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false));
-
         mTextView = (TextView) findViewById(R.id.camera_text);
 
         ((CheckBox) findViewById(R.id.checkBox)).setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
@@ -74,6 +79,8 @@ public class CameraActivity2 extends BaseActivity implements CameraInterface.Cam
                 }
             }
         });
+
+        findViewById(R.id.camera_about).setOnClickListener(this);
     }
 
     private void changeLayout(){
@@ -163,10 +170,6 @@ public class CameraActivity2 extends BaseActivity implements CameraInterface.Cam
             public void run() {
                 list = CameraInterface.getInstance().getSupportedPreviewSizes();
                 mRecyclerView.setAdapter(new CameraPreviewSizeAdapter(CameraActivity2.this, list, itemClickListener));
-
-                mRecyclerView2.setAdapter(
-                        new CameraPreviewSizeAdapter(CameraActivity2.this,
-                                CameraInterface.getInstance().getSupportedPictureSizes(), null));
             }
         });
     }
@@ -189,7 +192,94 @@ public class CameraActivity2 extends BaseActivity implements CameraInterface.Cam
 
     @Override
     public void onClick(View view) {
+        switch (view.getId()) {
+            case R.id.camera_about:
+                showAbout();
+                break;
+        }
+    }
 
+    private void showAbout() {
+        AlertDialog.Builder alertDialog = new AlertDialog.Builder(this);
+        alertDialog.setTitle("Camera Parameters");
+        StringBuilder about_string = new StringBuilder();
+        Camera.Parameters parameters = CameraInterface.getInstance().getParameters();
+        if(parameters == null){
+            return;
+        }
+
+        about_string.append("\n--Android API version: ");
+        about_string.append(Build.VERSION.SDK_INT);
+        about_string.append("\n--Device manufacturer: ");
+        about_string.append(Build.MANUFACTURER);
+        about_string.append("\n--Device model: ");
+        about_string.append(Build.MODEL);
+        about_string.append("\n--Device code-name: ");
+        about_string.append(Build.HARDWARE);
+        about_string.append("\n--Device variant: ");
+        about_string.append(Build.DEVICE);
+        {
+            ActivityManager activityManager = (ActivityManager)getSystemService(
+                    Activity.ACTIVITY_SERVICE);
+            about_string.append("\n--Standard max heap (MB): ");
+            about_string.append(activityManager.getMemoryClass());
+            about_string.append("\n--Large max heap (MB): ");
+            about_string.append(activityManager.getLargeMemoryClass());
+        }
+        {
+            Point display_size = new Point();
+            Display display = getWindowManager().getDefaultDisplay();
+            display.getSize(display_size);
+            about_string.append("\n--Display size: ");
+            about_string.append(display_size.x);
+            about_string.append("x");
+            about_string.append(display_size.y);
+        }
+
+        List<Camera.Size> sizes = parameters.getSupportedPreviewSizes();
+        if(sizes.size() > 0) {
+            about_string.append("\n--Preview resolutions: ");
+            for (int i = 0; i < sizes.size(); i++) {
+                if (i > 0) {
+                    about_string.append(", ");
+                }
+                about_string.append(sizes.get(i).width);
+                about_string.append("x");
+                about_string.append(sizes.get(i).height);
+            }
+        }
+
+        sizes = parameters.getSupportedPictureSizes();
+        if(sizes.size() > 0) {
+            about_string.append("\n--Photo resolutions: ");
+            for (int i = 0; i < sizes.size(); i++)
+            {
+                if (i > 0)
+                {
+                    about_string.append(", ");
+                }
+                about_string.append(sizes.get(i).width);
+                about_string.append("x");
+                about_string.append(sizes.get(i).height);
+            }
+        }
+
+        sizes = parameters.getSupportedVideoSizes();
+        if(sizes.size() > 0) {
+            about_string.append("\n--Video resolutions: ");
+            for (int i = 0; i < sizes.size(); i++) {
+                if (i > 0) {
+                    about_string.append(", ");
+                }
+                about_string.append(sizes.get(i).width);
+                about_string.append("x");
+                about_string.append(sizes.get(i).height);
+            }
+        }
+
+        alertDialog.setMessage(about_string);
+        alertDialog.setPositiveButton("OK", null);
+        alertDialog.show();
     }
 }
 

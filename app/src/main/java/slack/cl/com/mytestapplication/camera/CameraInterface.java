@@ -336,6 +336,11 @@ public class CameraInterface implements Camera.PreviewCallback{
         return mCamera.getParameters().getSupportedPictureSizes();
     }
 
+    public Camera.Parameters getParameters(){
+        if(mCamera == null) return null;
+        return mCamera.getParameters();
+    }
+
     /*为了实现拍照的快门声音及拍照保存照片需要下面三个回调变量*/
     ShutterCallback mShutterCallback = new ShutterCallback()
             //快门按下的回调，在这里我们可以设置类似播放“咔嚓”声之类的操作。默认的就是咔嚓。
