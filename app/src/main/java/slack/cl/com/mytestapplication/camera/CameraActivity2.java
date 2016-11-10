@@ -23,6 +23,8 @@ import android.widget.CompoundButton;
 import android.widget.FrameLayout;
 import android.widget.TextView;
 
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 
 import slack.cl.com.mytestapplication.R;
@@ -169,6 +171,7 @@ public class CameraActivity2 extends BaseActivity implements CameraInterface.Cam
             @Override
             public void run() {
                 list = CameraInterface.getInstance().getSupportedPreviewSizes();
+                Collections.sort(list, mSizeComparator);
                 mRecyclerView.setAdapter(new CameraPreviewSizeAdapter(CameraActivity2.this, list, itemClickListener));
             }
         });
@@ -198,6 +201,27 @@ public class CameraActivity2 extends BaseActivity implements CameraInterface.Cam
                 break;
         }
     }
+
+    /**
+     * 从大到小排序
+     */
+    private Comparator<Camera.Size> mSizeComparator = new Comparator<Camera.Size>()
+    {
+        @Override
+        public int compare(Camera.Size lhs, Camera.Size rhs)
+        {
+            int l = lhs.width * lhs.height;
+            int r = rhs.width * rhs.height;
+            if (l > r) {
+                return -1;
+            }
+            else if (l < r) {
+                return 1;
+            }
+
+            return 0;
+        }
+    };
 
     private void showAbout() {
         AlertDialog.Builder alertDialog = new AlertDialog.Builder(this);
@@ -280,6 +304,8 @@ public class CameraActivity2 extends BaseActivity implements CameraInterface.Cam
         alertDialog.setMessage(about_string);
         alertDialog.setPositiveButton("OK", null);
         alertDialog.show();
+
+
     }
 }
 
