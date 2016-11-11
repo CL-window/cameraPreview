@@ -76,7 +76,7 @@ public class CameraActivity2 extends BaseActivity implements CameraInterface.Cam
             @Override
             public void onCheckedChanged(CompoundButton compoundButton, boolean b) {
                 changeLayout = b;
-                if(!b){
+                if (!b) {
                     changeLayout();
                 }
             }
@@ -85,22 +85,42 @@ public class CameraActivity2 extends BaseActivity implements CameraInterface.Cam
         findViewById(R.id.camera_about).setOnClickListener(this);
     }
 
-    private void changeLayout(){
+    private void changeLayout() {
         ViewGroup.LayoutParams params = mFrameLayout.getLayoutParams();
         params.width = FrameLayout.LayoutParams.MATCH_PARENT;
-        params.height = FrameLayout.LayoutParams.MATCH_PARENT ;
+        params.height = FrameLayout.LayoutParams.MATCH_PARENT;
         mFrameLayout.setLayoutParams(params);
         mTextView.setVisibility(View.GONE);
     }
 
     // 短边铺满，长边缩放  摄像头旋转过90
-    private void changeLayout(int width,int height){
+    private void changeLayout(int width, int height) {
         ViewGroup.LayoutParams params = mFrameLayout.getLayoutParams();
         params.width = DisplayUtil.getScreenWidth(this);
-        params.height = (int)(((float)width) / ((float)height) * DisplayUtil.getScreenWidth(this)) ;
+        params.height = (int) (((float) width) / ((float) height) * DisplayUtil.getScreenWidth(this));
         mFrameLayout.setLayoutParams(params);
         mTextView.setVisibility(View.VISIBLE);
-        mTextView.setText("当前预览界面：" + params.height + "*" + params.width);
+        int gys = gys2(params.height, params.width);
+        mTextView.setText("预览界面：" + params.height + "*" + params.width
+        +"  " + params.height / gys +":"+ params.width / gys);
+    }
+
+    int gys2(int m, int n)//递归实现
+    {
+        int k, y;
+        if (m < n) {
+            k = m;
+            m = n;
+            n = k;
+        }
+        y = m % n;
+        if (y == 0) {
+            return n;
+        } else {
+            m = n;
+            n = y;
+            return gys2(m, n);
+        }
     }
 
     private void initViewParams() {
@@ -165,7 +185,7 @@ public class CameraActivity2 extends BaseActivity implements CameraInterface.Cam
         }
     }
 
-    private void initData(){
+    private void initData() {
         CameraInterface.getInstance().doStartPreview(textureView.getSurfaceTexture(), previewRate);
         runOnUiThread(new Runnable() {
             @Override
@@ -183,10 +203,10 @@ public class CameraActivity2 extends BaseActivity implements CameraInterface.Cam
         public void onItemClick(int pos) {
             previewRate = ((float) list.get(pos).height) / ((float) list.get(pos).width);
             CameraInterface.getInstance().doStartPreview(textureView.getSurfaceTexture(), list.get(pos));
-            if(changeLayout) {
+            if (changeLayout) {
                 // change view size
-                changeLayout(list.get(pos).width,list.get(pos).height);
-            }else {
+                changeLayout(list.get(pos).width, list.get(pos).height);
+            } else {
                 changeLayout();
             }
 
@@ -205,17 +225,14 @@ public class CameraActivity2 extends BaseActivity implements CameraInterface.Cam
     /**
      * 从大到小排序
      */
-    private Comparator<Camera.Size> mSizeComparator = new Comparator<Camera.Size>()
-    {
+    private Comparator<Camera.Size> mSizeComparator = new Comparator<Camera.Size>() {
         @Override
-        public int compare(Camera.Size lhs, Camera.Size rhs)
-        {
+        public int compare(Camera.Size lhs, Camera.Size rhs) {
             int l = lhs.width * lhs.height;
             int r = rhs.width * rhs.height;
             if (l > r) {
                 return -1;
-            }
-            else if (l < r) {
+            } else if (l < r) {
                 return 1;
             }
 
@@ -228,7 +245,7 @@ public class CameraActivity2 extends BaseActivity implements CameraInterface.Cam
         alertDialog.setTitle("Camera Parameters");
         StringBuilder about_string = new StringBuilder();
         Camera.Parameters parameters = CameraInterface.getInstance().getParameters();
-        if(parameters == null){
+        if (parameters == null) {
             return;
         }
 
@@ -243,7 +260,7 @@ public class CameraActivity2 extends BaseActivity implements CameraInterface.Cam
         about_string.append("\n--Device variant: ");
         about_string.append(Build.DEVICE);
         {
-            ActivityManager activityManager = (ActivityManager)getSystemService(
+            ActivityManager activityManager = (ActivityManager) getSystemService(
                     Activity.ACTIVITY_SERVICE);
             about_string.append("\n--Standard max heap (MB): ");
             about_string.append(activityManager.getMemoryClass());
@@ -261,7 +278,7 @@ public class CameraActivity2 extends BaseActivity implements CameraInterface.Cam
         }
 
         List<Camera.Size> sizes = parameters.getSupportedPreviewSizes();
-        if(sizes.size() > 0) {
+        if (sizes.size() > 0) {
             about_string.append("\n--Preview resolutions: ");
             for (int i = 0; i < sizes.size(); i++) {
                 if (i > 0) {
@@ -274,12 +291,10 @@ public class CameraActivity2 extends BaseActivity implements CameraInterface.Cam
         }
 
         sizes = parameters.getSupportedPictureSizes();
-        if(sizes.size() > 0) {
+        if (sizes.size() > 0) {
             about_string.append("\n--Photo resolutions: ");
-            for (int i = 0; i < sizes.size(); i++)
-            {
-                if (i > 0)
-                {
+            for (int i = 0; i < sizes.size(); i++) {
+                if (i > 0) {
                     about_string.append(", ");
                 }
                 about_string.append(sizes.get(i).width);
@@ -289,7 +304,7 @@ public class CameraActivity2 extends BaseActivity implements CameraInterface.Cam
         }
 
         sizes = parameters.getSupportedVideoSizes();
-        if(sizes.size() > 0) {
+        if (sizes.size() > 0) {
             about_string.append("\n--Video resolutions: ");
             for (int i = 0; i < sizes.size(); i++) {
                 if (i > 0) {
